@@ -9,10 +9,30 @@ const bot = new TeleBot(
 		interval: 1000, // Optional. How often check updates (in ms).
 		timeout: 0, // Optional. Update polling timeout (0 - short polling).
 		limit: 100, // Optional. Limits the number of updates to be retrieved.
-		retryTimeout: 5000, // Optional. Reconnecting timeout (in ms).
+		retryTimeout: 5000 // Optional. Reconnecting timeout (in ms).
 	}
 });
 
-bot.on('text', (msg) => msg.reply.text(msg.text));
+var reminders = []
+
+http.createServer(function (request, response) {
+	response.writeHead(404);
+	response.end();
+}).listen($PORT || 5000);
+
+bot.on(/^\/remind\s(.+)*/, function(msg, props){
+	msg.reply.text(props.match[1]);
+	reminders.push(props.match[1]);
+});
+
+bot.on('/print', function(msg){
+	var message = '';
+	
+	for(var i = 0; i < reminders.length; i++){
+		message += reminders[i];
+	}
+	
+	msg.reply.text(message);
+});
 
 bot.start();

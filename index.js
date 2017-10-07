@@ -13,6 +13,23 @@ const bot = new TeleBot(
 	}
 });
 
-bot.on('text', (msg) => msg.reply.text(msg.text));
+var stored = []
+
+bot.on(/^\/store (.+)$/, function(msg, props){
+	var s = props.match[1];
+	msg.reply.text('Adding a new string to store.');
+	stored.push(s);
+});
+
+bot.on('/print', function(msg){
+	var message = '';
+	
+	for(var i = 0; i < stored.length; i++){
+		message.concat(stored[i]);
+		message.concat('\n');
+	}
+	
+	bot.sendMessage(msg.from.id, message, {replyToMessage:msg.message_id});
+});
 
 bot.start();

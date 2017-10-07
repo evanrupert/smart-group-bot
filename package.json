@@ -10,8 +10,11 @@
     "type": "git",
     "url": "git+https://github.com/EvanRupert/smart-group-bot.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "telegram",
+    "bot"
+  ],
+  "author": "Evan Rupert, Jordan Richards, Rishi Basdeo, Clara Poffenberger",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/EvanRupert/smart-group-bot/issues"

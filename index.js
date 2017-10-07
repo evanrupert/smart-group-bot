@@ -28,7 +28,7 @@ var reminders = []
 http.createServer(function (request, response) {
 	response.writeHead(404);
 	response.end();
-}).listen($PORT || 5000);
+}).listen(process.env.PORT || 5000);
 
 bot.on(/^\/remind\s(.+)*/, function(msg, props){
 	msg.reply.text(props.match[1]);

@@ -1,0 +1,23 @@
+{
+  "name": "smartgroupbot",
+  "version": "1.0.0",
+  "description": "A telegram bot that helps with event organizing.",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EvanRupert/smart-group-bot.git"
+  },
+  "keywords": [
+    "telegram",
+    "bot"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/EvanRupert/smart-group-bot/issues"
+  },
+  "homepage": "https://github.com/EvanRupert/smart-group-bot#readme"
+}

@@ -9,27 +9,30 @@ const bot = new TeleBot(
 		interval: 1000, // Optional. How often check updates (in ms).
 		timeout: 0, // Optional. Update polling timeout (0 - short polling).
 		limit: 100, // Optional. Limits the number of updates to be retrieved.
-		retryTimeout: 5000, // Optional. Reconnecting timeout (in ms).
+		retryTimeout: 5000 // Optional. Reconnecting timeout (in ms).
 	}
 });
 
-var stored = []
+var reminders = []
 
-bot.on(/^\/store (.+)$/, function(msg, props){
-	var s = props.match[1];
-	msg.reply.text('Adding a new string to store.');
-	stored.push(s);
+http.createServer(function (request, response) {
+	response.writeHead(404);
+	response.end();
+}).listen($PORT || 5000);
+
+bot.on(/^\/remind\s(.+)*/, function(msg, props){
+	msg.reply.text(props.match[1]);
+	reminders.push(props.match[1]);
 });
 
 bot.on('/print', function(msg){
 	var message = '';
 	
-	for(var i = 0; i < stored.length; i++){
-		message.concat(stored[i]);
-		message.concat('\n');
+	for(var i = 0; i < reminders.length; i++){
+		message += reminders[i];
 	}
 	
-	bot.sendMessage(msg.from.id, message, {replyToMessage:msg.message_id});
+	msg.reply.text(message);
 });
 
 bot.start();

@@ -12,27 +12,49 @@ const schedule = require('node-schedule');
 tzwhere.init()
 
 const bot = require('./bot.js');
+var https = require('https');
 
 var sent_invites = new Object();
 var events = new Object();
 
 http.createServer(function (request, response) {
-	var parsedUrl = url.parse(req.url, true); // true to get query as object
-	var q = parsedUrl.query;
-	
-	if('start' in q){
-		if(q['start'] in sent_invites){
-			
-		}
-	}
-
 	response.writeHead(200, { 'Content-Type': 'text/html' });
 	response.end('walrus', 'utf-8');
 }).listen(process.env.PORT || 5000);
 
 var timezone_lookup = new Object();
 
-var reminders = []
+/*************************StartUp***********/
+
+var name     = 'undefined';
+var location = 'undefined';
+var date     = 'undefined';
+
+
+bot.on(/^\/start (.+)$/, (msg, props) => {
+	let str = props.match[1];
+	bot.sendMessage(msg.chat.id, str);
+});
+
+
+bot.on(/^\/setName (.+)$/, (msg, props) => {
+	name = props.match[1];
+	let id = msg.chat.id;
+	bot.setChatTitle(id, name);
+});
+
+bot.on(/^\/setLocation (.+)$/, (msg, props) => {
+	location = props.match[1];
+});
+
+bot.on(/^\/setDate (.+)$/, (msg, props) => {
+	date = props.match[1];
+});
+
+
+bot.on(['/getName'], (msg) => {
+	bot.sendMessage(msg.chat.id, name);
+});
 
 fs.readFile('./timezone.json', function(err, data){
 	if(!err)timezone_lookup = JSON.parse(data)
@@ -40,6 +62,7 @@ fs.readFile('./timezone.json', function(err, data){
 
 /*********************CheckIn**********/
 var attendees = {};
+var new_members = {};
 
 function attendeeToString(attendee) {
     return attendee.first_name + ' ' + attendee.last_name + ' (' + attendee.username + ')';
@@ -47,21 +70,26 @@ function attendeeToString(attendee) {
 
 
 bot.on(['/checkin'], (msg) => {
-	attendees[msg.from.id] = msg.from;
+	if(!(msg.chat.id in attendees)){
+		attendees[msg.chat.id] = new Object();
+	}
+	attendees[msg.chat.id][msg.from.id] = msg.from;
 	console.log(attendeeToString(msg.from) + ' has checked in');
 });
 
 
 bot.on(['/attendeeCount'], (msg) => {
-	bot.sendMessage(msg.chat.id, Object.keys(attendees).length);
+	if(!(msg.chat.id in attendees))attendees[msg.chat.id] = new Object();
+	bot.sendMessage(msg.chat.id, Object.keys(attendees[msg.chat.id]).length);
 });
 
 
 bot.on(['/attendeeList'], (msg) => {
-	if(Object.keys(attendees).length == 0) {
+	if(!(msg.chat.id in attendees))attendees[msg.chat.id] = new Object();
+	if(Object.keys(attendees[msg.chat.id]).length == 0) {
 		bot.sendMessage(msg.chat.id, 'There are no people in attendence');
 	} else {
-		let reply = Object.values(attendees).map(attendeeToString).join('\n');
+		let reply = Object.keys(attendees[msg.chat.id]).map((key) => attendees[msg.chat.id][key]).map(attendeeToString).join('\n');
 		bot.sendMessage(msg.chat.id, reply);
 	}
 });
@@ -81,7 +109,6 @@ bot.on('/updatelocation', function (msg){
 	['Cancel']], {once:true, resize:true})
     bot.sendMessage(msg.chat.id, "Input timezone:", {replyMarkup: replyMark})
 });
-
 
 bot.on('location', (loc) => {
 	bot.sendMessage(loc.chat.id, 'Location: '.concat(loc.location.latitude).concat(loc.location.longitude))

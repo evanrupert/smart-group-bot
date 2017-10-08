@@ -290,9 +290,9 @@ bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop) {
 		return;
 	}
 	
+	let event_name = 'Main event will start in ' + num + ' ' + suffix
 	bot.sendMessage(msg.chat.id, 'Created notification event! : ' + num + ' ' + suffix + ' ( ' + new_date + ' )');
-	name = 'Main event will start in ' + num + ' ' + suffix
-	scheduleEvent(msg.chat.id, msg.message_id, name, new_date)
+	scheduleEvent(msg.chat.id, msg.message_id, event_name, new_date)
 })
 
 

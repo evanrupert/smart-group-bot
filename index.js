@@ -173,4 +173,23 @@ bot.on(/^\/cancel\s(.+)/, function(msg, prop){
 	}
 });
 
+/*************************Testing******
+in_chat = {}
+
+bot.on('newChatMembers', function(msg){
+	if(!(msg.chat.id in in_chat))in_chat[msg.chat.id] = []
+	
+	for(var user in msg.new_chat_members){
+		in_chat[msg.chat.id].push(user)
+	}
+});
+
+bot.on('/clear', function(msg){
+	if(!msg.chat.id in in_chat)return;
+	
+	for(var user in in_chat[msg.chat.id]){
+		bot.kickChatMember(msg.chat.id, user.id)
+	}
+})*/
+
 bot.start();

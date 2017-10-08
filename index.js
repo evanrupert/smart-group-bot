@@ -414,6 +414,7 @@ bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
 	}
 	
 	bot.sendMessage(msg.chat.id, message);
+	bot.leaveChat(msg.chat.id);
 });
 
 /*************************TESTING**********************/

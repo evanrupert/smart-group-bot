@@ -4,8 +4,6 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
-app.set('port', (process.env.PORT || 5000));
-
 const TeleBot = require('telebot')
 
 const bot = new TeleBot(

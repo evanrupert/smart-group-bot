@@ -5,33 +5,16 @@ var url = require('url')
 var fs = require('fs');
 var path = require('path');
 
-<<<<<<< HEAD
 const tzwhere = require('tzwhere');
 const parsetime = require('parsetime')
-
-const TeleBot = require('telebot');
+const schedule = require('node-schedule');
 
 tzwhere.init()
 
-var schedule = require('node-schedule');
-=======
->>>>>>> cea68800b580167006c4d13aa90c01732a360929
-
 const bot = require('./bot.js');
-
-<<<<<<< HEAD
-	polling: { // Optional. Use polling.
-		interval: 1000, // Optional. How often check updates (in ms).
-		timeout: 0, // Optional. Update polling timeout (0 - short polling).
-		limit: 100, // Optional. Limits the number of updates to be retrieved.
-		retryTimeout: 5000 // Optional. Reconnecting timeout (in ms).
-	}
-});
 
 var sent_invites = new Object();
 var events = new Object();
-=======
->>>>>>> cea68800b580167006c4d13aa90c01732a360929
 
 http.createServer(function (request, response) {
 	var parsedUrl = url.parse(req.url, true); // true to get query as object
@@ -47,57 +30,15 @@ http.createServer(function (request, response) {
 	response.end('walrus', 'utf-8');
 }).listen(process.env.PORT || 5000);
 
-<<<<<<< HEAD
-/************************Start*********************/
 var timezone_lookup = new Object();
-=======
-	
-bot.on(/^\/name (.+)$/, (msg, props) => {
-	let name = props.match[1];
-	const id = msg.chat.id
-	bot.sendMessage(id, name)
-	bot.setChatTitle(id, name)
-
-//bot.on(['/start','/hello'], (msg) => {
-//	bot.sendMessage(msg.from.id, 'Please enter your event name')
-});
-
-bot.on(/^\/location (.+)$/, (msg, props) => {
-	let location = props.match[1];
-	bot.sendMessage(msg.from.id, location)
-});
-
-bot.on(/^\/date (.+)$/, (msg, props) => {
-	let date = props.match[1];
-	bot.sendMessage(msg.from.id, date)
-});
-
-
-
-	
 
 var reminders = []
-
-
-
-/*********************CheckIn**********/
->>>>>>> cea68800b580167006c4d13aa90c01732a360929
 
 fs.readFile('./timezone.json', function(err, data){
 	if(!err)timezone_lookup = JSON.parse(data)
 });
 
-bot.on('/updatelocation', function (msg){
-    const replyMark = bot.keyboard([
-	[{
-		text: 'Send my location',
-		request_location: true
-	}],
-	['Cancel']], {once:true, resize:true})
-    bot.sendMessage(msg.chat.id, "Input timezone:", {replyMarkup: replyMark})
-});
-
-
+/*********************CheckIn**********/
 var attendees = {};
 
 function attendeeToString(attendee) {
@@ -129,6 +70,18 @@ bot.on(['/attendeeList'], (msg) => {
 bot.on(['/clearAttendees'], (msg) => {
 	attendees = {};
 });
+
+/********************Reminders*******/
+bot.on('/updatelocation', function (msg){
+    const replyMark = bot.keyboard([
+	[{
+		text: 'Send my location',
+		request_location: true
+	}],
+	['Cancel']], {once:true, resize:true})
+    bot.sendMessage(msg.chat.id, "Input timezone:", {replyMarkup: replyMark})
+});
+
 
 bot.on('location', (loc) => {
 	bot.sendMessage(loc.chat.id, 'Location: '.concat(loc.location.latitude).concat(loc.location.longitude))

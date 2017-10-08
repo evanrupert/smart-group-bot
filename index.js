@@ -109,17 +109,27 @@ bot.on(/^\/event\s(.+)/, function (msg, prop){
 		if(unixTime == 0){
 			bot.sendMessage(msg.chat.id, 'Unrecognized time format.');
 		}else{
-			var time = new Date(parsetime(extracted_time + '2017').absolute)
+			var time = new Date(parsetime(extracted_time).absolute)
+			console.log(time.getYear())
+			if(time.getFullYear() == '2001'){
+				time = new Date(parsetime(extracted_time + ' 2017').absolute)
+			}
+			
 			time = new Date(time.valueOf() + time.getTimezoneOffset() * 60 * 1000 + timezone_lookup[msg.from.id])
-			bot.sendMessage(msg.chat.id, 'Created new event: ' + (name || 'Unnamed') + ' @ ' + time)
 			
-			const j = schedule.scheduleJob(time, function(chat_id, msg_id, event_name){
-				if(events[name] == true)
-					bot.sendMessage(chat_id, 'It\'s time for this event!: ' + event_name, {replyToMessage: msg_id});
-				delete events[name]
-			}.bind(null, msg.chat.id, msg.message_id, name));
-			
-			events[name] = true
+			if(time.valueOf() < Date.now()){
+				bot.sendMessage(msg.chat.id, 'Time has already passed. Event not created.');
+			}else{
+				bot.sendMessage(msg.chat.id, 'Created new event: ' + (name || 'Unnamed') + ' @ ' + time)
+				
+				const j = schedule.scheduleJob(time, function(chat_id, msg_id, event_name){
+					if(events[name] == true)
+						bot.sendMessage(chat_id, 'It\'s time for this event!: ' + event_name, {replyToMessage: msg_id});
+					delete events[name]
+				}.bind(null, msg.chat.id, msg.message_id, name));
+				
+				events[name] = true
+			}
 		}
 	}
 });

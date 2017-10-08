@@ -32,7 +32,12 @@ bot.on(['/checkin'], (msg) => {
 });
 
 
-bot.on(['/getAttendees'], (msg) => {
+bot.on(['/attendeeCount'], (msg) => {
+	bot.sendMessage(msg.chat.id, Object.keys(attendees).length);
+});
+
+
+bot.on(['/attendeeList'], (msg) => {
 	if(Object.keys(attendees).length == 0) {
 		bot.sendMessage(msg.chat.id, 'There are no people in attendence');
 	} else {

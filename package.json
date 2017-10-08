@@ -21,6 +21,9 @@
   },
   "homepage": "https://github.com/EvanRupert/smart-group-bot#readme",
   "dependencies": {
-    "telebot": "^1.2.3"
+    "node-schedule": "^1.2.5",
+    "parsetime": "^0.2.9",
+    "telebot": "^1.2.3",
+    "tzwhere": "^1.0.0"
   }
 }

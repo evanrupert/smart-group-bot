@@ -99,6 +99,7 @@ bot.on(['/clearAttendees'], (msg) => {
 	attendees = {};
 });
 
+
 /********************Reminders*******/
 bot.on('/updatelocation', function (msg){
     const replyMark = bot.keyboard([
@@ -173,23 +174,85 @@ bot.on(/^\/cancel\s(.+)/, function(msg, prop){
 	}
 });
 
-/*************************Testing******
-in_chat = {}
+/**************************LINKING**************/
+let share_data = new Object();
 
-bot.on('newChatMembers', function(msg){
-	if(!(msg.chat.id in in_chat))in_chat[msg.chat.id] = []
+const randBase64 = function(pool, length){
+	let ret = ''
 	
-	for(var user in msg.new_chat_members){
-		in_chat[msg.chat.id].push(user)
+	for(var i = 0; i < length; i++){
+		ret += pool.charAt(Math.floor(Math.random() * pool.length))
 	}
+	
+	return ret
+}
+
+const make_id = function(length){
+	while(true){
+		let id = randBase64('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', length)
+		if(!(id in share_data))return id
+	}
+}
+
+// https://t.me/joinchat/G0BAhkLtT44bjTBX-bl6iQ
+bot.on(['/shareLink'], (msg) => {
+	https.get('https://api.telegram.org/bot457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y/exportChatInviteLink?chat_id=' + msg.chat.id, (res) => {
+		let raw = '';
+		res.on('data', (d) => {
+			raw += d;
+		});
+		
+		json = JSON.parse(raw);
+
+		if(json && json.result){
+			let link = json.result;
+			let split = link.split('/');
+			let linkBottom = split[split.length - 1];
+			
+			let id = make_id(10)
+			
+			share_data[id] = {
+				'ref': linkBottom,
+				'name': name,
+				'loc': '',
+				'time': ''
+			}
+			
+			let startGroupLink = 'https://telegram.me/smrtgroupbot?startgroup=' + id
+			bot.sendMessage(msg.chat.id, startGroupLink);
+		} else {
+			bot.sendMessage(msg.chat.id, 'Unable to get invite link!!\nMake sure the SmartGroupBot has admin right to invite users via link and the current group is upgraded to a supergroup');
+		}
+	});
 });
 
-bot.on('/clear', function(msg){
-	if(!msg.chat.id in in_chat)return;
+bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
+	let id = props.match[1]
 	
-	for(var user in in_chat[msg.chat.id]){
-		bot.kickChatMember(msg.chat.id, user.id)
+	if(!(id in share_data)){
+		console.log('Invalid id: ' + id)
+		return
 	}
-})*/
+
+	let link = 'https://t.me/joinchat/' + share_data[id]['ref']
+	let group_name = share_data[id]['name']
+	
+	delete share_data[id]
+	
+	bot.sendMessage(msg.chat.id, 'Hello everybody, if you are interested in joining the ' + group_name + ' study group follow this link: ' + link);
+	bot.leaveChat(msg.chat.id);
+});
+
+/*************************TESTING**********************/
+
+bot.on(['/getId'], (msg) => {
+	bot.sendMessage(msg.chat.id, msg.chat.id);
+})
+
+
+bot.on(['/test'], (msg) => {
+	bot.sendMessage(msg.chat.id, 'Test');
+});
+>>>>>>> link
 
 bot.start();

@@ -33,7 +33,7 @@ GROUP COMMANDS
 	/help                      //opens help directory
 ```
 
-Packages:
+Dependencies:
   - parsetime
   - node-schedule
   - telebot

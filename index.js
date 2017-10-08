@@ -1,9 +1,5 @@
 'use strict'
-
-var http = require('http');
-var fs = require('fs');
-var path = require('path');
-
+const http = require('http');
 const bot = require('./bot.js');
 
 http.createServer(function (request, response) {
@@ -14,26 +10,38 @@ http.createServer(function (request, response) {
 
 /*************************StartUp***********/
 
+var name     = 'undefined';
+var location = 'undefined';
+var date     = 'undefined';
 
 
-bot.on(/^\/name (.+)$/, (msg, props) => {
-	let name = props.match[1];
-	const id = msg.chat.id
-	bot.sendMessage(id, name)
-	bot.setChatTitle(id, name)
-
-//bot.on(['/start','/hello'], (msg) => {
-//	bot.sendMessage(msg.from.id, 'Please enter your event name')
+bot.on(/^\/setName (.+)$/, (msg, props) => {
+	name = props.match[1];
+	let id = msg.chat.id;
+	bot.setChatTitle(id, name);
 });
 
-bot.on(/^\/location (.+)$/, (msg, props) => {
-	let location = props.match[1];
-	bot.sendMessage(msg.from.id, location)
+bot.on(/^\/setLocation (.+)$/, (msg, props) => {
+	location = props.match[1];
 });
 
-bot.on(/^\/date (.+)$/, (msg, props) => {
-	let date = props.match[1];
-	bot.sendMessage(msg.from.id, date)
+bot.on(/^\/setDate (.+)$/, (msg, props) => {
+	date = props.match[1];
+});
+
+
+bot.on(['/getName'], (msg) => {
+	bot.sendMessage(msg.chat.id, name);
+});
+
+
+bot.on(['/getDate'], (msg) => {
+	bot.sendMessage(msg.chat.id, date);
+});
+
+
+bot.on(['/getLocation'], (msg) => {
+	bot.sendMessage(msg.chat.id, location);
 });
 
 

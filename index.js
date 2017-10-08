@@ -288,6 +288,7 @@ bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop) {
 	scheduleEvent(msg.chat.id, msg.message_id, name, new_date)
 })
 
+
 bot.on(/^\/notify\s(\d+)\s(.+)\after/, function (msg, prop){
 	if(!(msg.chat.id in date)) {
 		bot.sendMessage(msg.chat.id, 'No event date specified.');
@@ -416,6 +417,19 @@ bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
 	bot.sendMessage(msg.chat.id, message);
 	bot.leaveChat(msg.chat.id);
 });
+
+
+/****************************DESTROY**********/
+
+
+bot.on(['/destroy'], (msg) => {
+	delete name[msg.chat.id];
+	delete location[msg.chat.id];
+	delete date[msg.chat.id];
+	delete attendees[msg.chat.id];
+	//TODO: also destroy events data (looking at you jordan)
+});
+
 
 /*************************TESTING**********************/
 

@@ -35,7 +35,7 @@ http.createServer(function (request, response) {
 /************************Start*********************/
 
 
-bot.on('text', (msg) => msg.reply.text(msg));
+bot.on('text', (msg) => msg.reply.text(msg.text));
 
 
 bot.start();

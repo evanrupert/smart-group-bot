@@ -1,6 +1,9 @@
 'use strict'
+
 const http = require('http');
 const bot = require('./bot.js');
+var https = require('https');
+
 
 http.createServer(function (request, response) {
 	response.writeHead(200, { 'Content-Type': 'text/html' });
@@ -13,6 +16,12 @@ http.createServer(function (request, response) {
 var name     = 'undefined';
 var location = 'undefined';
 var date     = 'undefined';
+
+
+bot.on(/^\/start (.+)$/, (msg, props) => {
+	let str = props.match[1];
+	bot.sendMessage(msg.chat.id, str);
+});
 
 
 bot.on(/^\/setName (.+)$/, (msg, props) => {
@@ -56,21 +65,25 @@ function attendeeToString(attendee) {
 
 
 bot.on(['/checkin'], (msg) => {
-	attendees[msg.from.id] = msg.from;
+	let my_attendee_list = new Object();
+	if(msg.chat.id in attendees){
+		my_attendee_list = attendees[msg.chat.id]
+	}
+	my_attendee_list[msg.chat.id][msg.from.id] = msg.from;
 	console.log(attendeeToString(msg.from) + ' has checked in');
 });
 
 
 bot.on(['/attendeeCount'], (msg) => {
-	bot.sendMessage(msg.chat.id, Object.keys(attendees).length);
+	bot.sendMessage(msg.chat.id, Object.keys(attendees[msg.chat.id]).length);
 });
 
 
 bot.on(['/attendeeList'], (msg) => {
-	if(Object.keys(attendees).length == 0) {
+	if(Object.keys(attendees[msg.chat.id]).length == 0) {
 		bot.sendMessage(msg.chat.id, 'There are no people in attendence');
 	} else {
-		let reply = Object.values(attendees).map(attendeeToString).join('\n');
+		let reply = Object.values(attendees[msg.chat.id]).map(attendeeToString).join('\n');
 		bot.sendMessage(msg.chat.id, reply);
 	}
 });
@@ -81,5 +94,29 @@ bot.on(['/clearAttendees'], (msg) => {
 });
 
 
+/*************************TESTING**********************/
+
+bot.on(['/getId'], (msg) => {
+	bot.sendMessage(msg.chat.id, msg.chat.id);
+})
+
+
+bot.on(['/test'], (msg) => {
+	https.get('https://api.telegram.org/bot457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y/exportChatInviteLink?chat_id=' + msg.chat.id, (res) => {
+		let raw = '';
+		res.on('data', (d) => {
+			raw += d;
+		});
+
+		res.on('end', () => {
+			let json = JSON.parse(raw)
+
+			if(json){
+				let link = json.result;
+				bot.sendMessage(msg.chat.id, link);
+			}
+		});
+	});
+});
 
 bot.start();

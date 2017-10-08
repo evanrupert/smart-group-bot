@@ -229,16 +229,20 @@ const parseTime = function(extracted_time, timezoneOffset) {
 
 const scheduleEvent = function(chat_id, msg_id, name, time){
 	const j = schedule.scheduleJob(time, function(){
-		if(events[name] == true)
+		if(events[chat_id][name] == true)
 			bot.sendMessage(chat_id, 'Event!: ' + name, {replyToMessage: msg_id});
-		delete events[name]
+		delete events[chat_id][name]
 	})
 
-	events[name] = true
+	events[chat_id][name] = true
 }
 
 
 bot.on(/^\/event\s(.+)/, function (msg, prop) {
+	if(!(msg.chat.id in events)){
+		events[msg.chat.id] = new Object()
+	}
+
 	if (!(msg.from.id in timezone_lookup)) {
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updatelocation before using events.');
 	} else {
@@ -333,12 +337,12 @@ bot.on(/^\/notify\s(\d+)\s(.+)\after/, function (msg, prop){
 bot.on(/^\/cancel\s(.+)/, function(msg, prop){
 	const name = prop.match[1].trim()
 	
-	if(!(name in events)){
+	if(!(name in events[msg.chat.id])){
 		bot.sendMessage(msg.chat.id, 'Could not find event, ' + name)
 		bot.sendMessage(msg.chat.id, Object.keys(events))
 	}else{
 		bot.sendMessage(msg.chat.id, 'Cancelling event: ' + name)
-		events[name] = false
+		events[msg.chat.id][name] = false
 	}
 });
 
@@ -452,6 +456,7 @@ bot.on(['/destroy'], (msg) => {
 	delete location[msg.chat.id];
 	delete date[msg.chat.id];
 	delete attendees[msg.chat.id];
+	delete events[msg.chat.id];
 	//TODO: also destroy events data (looking at you jordan)
 });
 

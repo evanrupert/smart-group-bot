@@ -184,7 +184,7 @@ bot.on('/updateTimezone', function (msg){
 		request_location: true
 	}],
 	['Cancel']], {once:true, resize:true})
-    bot.sendMessage(msg.chat.id, "Update timezone:", {replyMarkup: replyMark})
+    bot.sendMessage(msg.chat.id, "Input timezone:", {replyMarkup: replyMark})
 });
 
 

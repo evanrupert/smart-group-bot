@@ -1,4 +1,4 @@
- SmartGroupBot: The Handy Telegram bot for coordinating group events!
+ SmartGroupBot: The handy Telegram bot for coordinating group events!
 
 
 # Features

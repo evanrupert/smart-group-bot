@@ -17,6 +17,7 @@ var https = require('https');
 var sent_invites = new Object();
 var events = new Object();
 
+
 http.createServer(function (request, response) {
 	response.writeHead(200, { 'Content-Type': 'text/html' });
 	response.end('walrus', 'utf-8');
@@ -24,15 +25,44 @@ http.createServer(function (request, response) {
 
 var timezone_lookup = new Object();
 
+
 /*************************StartUp***********/
+
 
 var name     = new Object();
 var location = new Object();
 var date     = new Object();
 
+
 bot.on(/^\/start (.+)$/, (msg, props) => {
 	let str = props.match[1];
 	bot.sendMessage(msg.chat.id, str);
+});
+
+
+bot.on('/welcome', (msg) => {
+	bot.sendMessage(msg.chat.id, 'Welcome to Smart Group Bot, a management tool ideal for dealing with dyamic chats, such as study groups, or meetings.\nFor a list of commands, type /help.')
+})
+
+
+bot.on(['/start','/help'], (msg) => {
+	bot.sendMessage(msg.chat.id,
+	'Hello! here are some useful comands to comunicate with SmartGroupBot.\n'+
+	' /setName <name> to set the name of the group chat.\n'+
+	' /setLocation to set the event location to your current location.\n'+
+	' /setDate <time/date string> to the set the event time/date.\n'+
+	' /getName to get the group chats name.\n'+
+	' /getTime to get the event time.\n'+
+	' /checkin to notify that you are at the event.\n' +
+	' /checkout to notify that you have left the event.\n' +
+	' /attendeeCount to see how many people are currently checked in.\n'+
+	' /attendeeList to see which people are currently checked in.\n'+
+	' /clearAttendees to reset the checkin list.\n'+
+	' /updateTimezone to update your timezone. Allows the app to detect the user\'s timezone, required for submitting dates.\n'+
+	' /event <event name>, <date/time string> to schedule a reminder for an event.\n'+ 
+	' /cancel <event name> to cancel the given event.\n'+
+	' /shareLink used to send invite link to a larger chat.\n'+
+	'To repeat this message, type /help');
 });
 
 
@@ -42,15 +72,18 @@ bot.on(/^\/setName (.+)$/, (msg, props) => {
 	bot.setChatTitle(id, name[msg.chat.id]);
 });
 
+
 bot.on(/^\/setLocation (.+)$/, (msg, props) => {
 	location[msg.chat.id] = props.match[1];
 });
+
 
 bot.on(/^\/setDate (.+)$/, (msg, props) => {
 	if (!(msg.from.id in timezone_lookup)){
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updateTimezone before using events.');
 	}else date[msg.chat.id] = parseTime(props.match[1], timezone_lookup[msg.from.id])
 });
+
 
 const resolveName = function(chat_id, callback = null){
 	https.get('https://api.telegram.org/bot457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y/getChat?chat_id=' + chat_id, (res) => {
@@ -69,6 +102,7 @@ const resolveName = function(chat_id, callback = null){
 	});
 }
 
+
 bot.on(['/getName'], (msg) => {
 	if(!(msg.chat.id in name)){
 		resolveName(msg.chat.id, function(){
@@ -77,17 +111,23 @@ bot.on(['/getName'], (msg) => {
 	}else bot.sendMessage(msg.chat.id, name[msg.chat.id]);
 });
 
+
 bot.on(['/getDate'], (msg) => {
 	bot.sendMessage(msg.chat.id, date[msg.chat.id]);
 });
+
 
 fs.readFile('./timezone.json', function(err, data){
 	if(!err)timezone_lookup = JSON.parse(data)
 });
 
+
 /*********************CheckIn**********/
+
+
 var attendees = {};
 var new_members = {};
+
 
 function attendeeToString(attendee) {
     return attendee.first_name + ' ' + attendee.last_name + ' (' + attendee.username + ')';
@@ -102,13 +142,15 @@ bot.on(['/checkin'], (msg) => {
 	console.log(attendeeToString(msg.from) + ' has checked in');
 });
 
+
 bot.on(['/checkout'], (msg) => {
-	if(!(msg.chat.id in attendees)){
+	if(!(msg.chat.id in attendees)) {
 		attendees[msg.chat.id] = new Object();
 	}
-	if(msg.from.id in attendees[msg.chat.id]){
+	if(msg.from.id in attendees[msg.chat.id]) {
 		delete attendees[msg.chat.id][msg.from.id]
-	}console.log(attendeeToString(msg.from) + ' has checked out');
+	}
+	console.log(attendeeToString(msg.from) + ' has checked out');
 })
 
 
@@ -145,6 +187,7 @@ bot.on('/updateTimezone', function (msg){
     bot.sendMessage(msg.chat.id, "Update timezone:", {replyMarkup: replyMark})
 });
 
+
 bot.on('location', (loc) => {
 	bot.sendMessage(loc.chat.id, 'Location: '.concat(loc.location.latitude).concat(loc.location.longitude))
 	bot.sendMessage(loc.chat.id, 'Timezone: '.concat(tzwhere.tzNameAt(loc.location.latitude,loc.location.longitude)))
@@ -155,17 +198,19 @@ bot.on('location', (loc) => {
 	fs.writeFile('./timezone.json', JSON.stringify(timezone_lookup), (err) => {})
 })
 
-bot.on('/time', function(msg){
+
+bot.on('/time', function(msg) {
 	msg.reply.text(new Date())
 })
 
-const parseTime = function(extracted_time, timezoneOffset){
+
+const parseTime = function(extracted_time, timezoneOffset) {
 	var unixTime = parsetime(extracted_time).absolute
-	if(unixTime == 0){
+	if(unixTime == 0) {
 		return null
-	}else{
+	} else {
 		var time = new Date(parsetime(extracted_time).absolute)
-		if(time.getFullYear() == '2001'){
+		if(time.getFullYear() == '2001') {
 			time = new Date(parsetime(extracted_time + ' 2017').absolute)
 		}
 		
@@ -173,6 +218,7 @@ const parseTime = function(extracted_time, timezoneOffset){
 		return time
 	}
 }
+
 
 const scheduleEvent = function(chat_id, msg_id, name, time){
 	const j = schedule.scheduleJob(time, function(){
@@ -184,30 +230,32 @@ const scheduleEvent = function(chat_id, msg_id, name, time){
 	events[name] = true
 }
 
-bot.on(/^\/event\s(.+)/, function (msg, prop){
-	if (!(msg.from.id in timezone_lookup)){
+
+bot.on(/^\/event\s(.+)/, function (msg, prop) {
+	if (!(msg.from.id in timezone_lookup)) {
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updatelocation before using events.');
-	}else{
+	} else {
 		const msg_data = prop.match[1].split(/,(\s+)/)
 		const extracted_time = msg_data[msg_data.length - 1]
 		const name = msg_data.slice(0,msg_data.length-1).join('').trim()
 		
 		let time = parseTime(extracted_time, timezone_lookup[msg.from.id])
 		
-		if(time){
+		if(time) {
 			if(time.valueOf() < Date.now()){
 				bot.sendMessage(msg.chat.id, 'Time has already passed. Event not created.');
-			}else{
+			} else {
 				bot.sendMessage(msg.chat.id, 'Created new event: ' + (name || 'Unnamed') + ' @ ' + time)
 				scheduleEvent(msg.chat.id, msg.message_id, name, time)
 			}
-		}else{
+		} else {
 			bot.sendMessage(msg.chat.id, 'Unrecognized time/date format.');
 		}
 	}
 });
 
-bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop){
+
+bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop) {
 	if(!(msg.chat.id in date)){
 		bot.sendMessage(msg.chat.id, 'No event date specified.')
 		return
@@ -218,21 +266,21 @@ bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop){
 	let suffix = ''
 	
 	let new_date = date[msg.chat.id]
-	if(units.includes('min')){
+	if(units.includes('min')) {
 		new_date = new Date(new_date.valueOf() - num * 60000)
 		suffix = 'minute(s)'
-	}else if(units.includes('hr') || units.includes('hour')){
+	} else if(units.includes('hr') || units.includes('hour')) {
 		new_date = new Date(new_date.valueOf() - num * 3600000)
 		suffix = 'hour(s)'
-	}else if(units.includes('sec')){
+	} else if(units.includes('sec')) {
 		new_date = new Date(new_date.valueOf() - num * 1000)
 		suffix = 'second(s)'
-	}else if(units.include('day')){
+	} else if(units.include('day')) {
 		new_date = new Date(new_date.valueOf() - num * 86400000)
 		suffix = 'day(s)'
-	}else{
+	} else {
 		bot.sendMessage(msg.chat.id, 'Unrecognized unit.')
-		return
+		return;
 	}
 	
 	bot.sendMessage(msg.chat.id, 'Created notification event! : ' + num + ' ' + suffix + ' ( ' + new_date + ' )');
@@ -241,30 +289,30 @@ bot.on(/^\/notify\s(\d+)\s(.+)\sbefore/, function (msg, prop){
 })
 
 bot.on(/^\/notify\s(\d+)\s(.+)\after/, function (msg, prop){
-	if(!(msg.chat.id in date)){
-		bot.sendMessage(msg.chat.id, 'No event date specified.')
-		return
+	if(!(msg.chat.id in date)) {
+		bot.sendMessage(msg.chat.id, 'No event date specified.');
+		return;
 	}
 	
-	let units = prop.match[2].trim().toLowerCase()
-	let num = prop.match[1].trim()
-	let suffix = ''
+	let units = prop.match[2].trim().toLowerCase();
+	let num = prop.match[1].trim();
+	let suffix = '';
 	
-	let new_date = date[msg.chat.id]
-	if(units.includes('min')){
-		new_date = new Date(new_date.valueOf() + num * 60000)
-		suffix = 'minute(s)'
-	}else if(units.includes('hr') || units.includes('hour')){
-		new_date = new Date(new_date.valueOf() + num * 3600000)
-		suffix = 'hour(s)'
-	}else if(units.includes('sec')){
-		new_date = new Date(new_date.valueOf() + num * 1000)
-		suffix = 'second(s)'
-	}else if(units.include('day')){
-		new_date = new Date(new_date.valueOf() + num * 86400000)
-		suffix = 'day(s)'
-	}else{
-		bot.sendMessage(msg.chat.id, 'Unrecognized unit.')
+	let new_date = date[msg.chat.id];
+	if(units.includes('min')) {
+		new_date = new Date(new_date.valueOf() + num * 60000);
+		suffix = 'minute(s)';
+	} else if(units.includes('hr') || units.includes('hour')) {
+		new_date = new Date(new_date.valueOf() + num * 3600000);
+		suffix = 'hour(s)';
+	} else if(units.includes('sec')) {
+		new_date = new Date(new_date.valueOf() + num * 1000);
+		suffix = 'second(s)';
+	} else if(units.include('day')) {
+		new_date = new Date(new_date.valueOf() + num * 86400000);
+		suffix = 'day(s)';
+	} else {
+		bot.sendMessage(msg.chat.id, 'Unrecognized unit.');
 		return
 	}
 	
@@ -273,15 +321,6 @@ bot.on(/^\/notify\s(\d+)\s(.+)\after/, function (msg, prop){
 	scheduleEvent(msg.chat.id, msg.message_id, name, new_date)
 })
 
-bot.on('/notify start', function(msg){
-	if(!(msg.chat.id in date)){
-		bot.sendMessage(msg.chat.id, 'No event date specified.')
-		return
-	}
-
-	bot.sendMessage(msg.chat.id, 'Created notification event! : Event Start ( ' + date[msg.chat.id] + ' )');
-	scheduleEvent(msg.chat.id, msg.message_id, 'Event Start', date[msg.chat.id])
-})
 
 bot.on(/^\/cancel\s(.+)/, function(msg, prop){
 	const name = prop.match[1].trim()
@@ -308,6 +347,7 @@ const randBase64 = function(pool, length){
 	return ret
 }
 
+
 const make_id = function(length){
 	while(true){
 		let id = randBase64('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', length)
@@ -315,7 +355,7 @@ const make_id = function(length){
 	}
 }
 
-// https://t.me/joinchat/G0BAhkLtT44bjTBX-bl6iQ
+
 bot.on(['/shareLink'], (msg) => {
 	if(!(msg.chat.id in name))
 		resolveName(msg.chat.id)
@@ -352,29 +392,7 @@ bot.on(['/shareLink'], (msg) => {
 	});
 });
 
-bot.on('/welcome', (msg) => {
-	bot.sendMessage(msg.chat.id, 'Welcome to Smart Group Bot, a management tool ideal for dealing with dyamic chats, such as study groups, or meetings.\nFor a list of commands, type /help.')
-})
 
-bot.on(['/start','/help'], (msg) => {
-	bot.sendMessage(msg.chat.id,
-	'Hello! here are some useful comands to comunicate with SmartGroupBot.\n'+
-	' /setName <name> to set the name of the group chat.\n'+
-	' /setLocation to set the event location to your current location.\n'+
-	' /setDate <time/date string> to the set the event time/date.\n'+
-	' /getName to get the group chats name.\n'+
-	' /getTime to get the event time.\n'+
-	' /checkin to notify that you are at the event.\n' +
-	' /checkout to notify that you have left the event.\n' +
-	' /attendeeCount to see how many people are currently checked in.\n'+
-	' /attendeeList to see which people are currently checked in.\n'+
-	' /clearAttendees to reset the checkin list.\n'+
-	' /updateTimezone to update your timezone. Allows the app to detect the user\'s timezone, required for submitting dates.\n'+
-	' /event <event name>, <date/time string> to schedule a reminder for an event.\n'+ 
-	' /cancel <event name> to cancel the given event.\n'+
-	' /shareLink used to send invite link to a larger chat.\n'+
-	'To repeat this message, type /help');
-});
 
 bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
 	let id = props.match[1]

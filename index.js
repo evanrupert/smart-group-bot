@@ -32,22 +32,10 @@ http.createServer(function (request, response) {
 }).listen(process.env.PORT || 5000);
 
 
-//useful
+/************************Start*********************/
 
 
-bot.on(/^\/remind\s(.+)*/, function(msg, props){
-	msg.reply.text(props.match[1]);
-	reminders.push(props.match[1]);
-});
+bot.on('text', (msg) => msg.reply.text("Server: " + msg));
 
-bot.on('/print', function(msg){
-	var message = '';
-	
-	for(var i = 0; i < reminders.length; i++){
-		message += reminders[i];
-	}
-	
-	msg.reply.text(message);
-});
 
 bot.start();

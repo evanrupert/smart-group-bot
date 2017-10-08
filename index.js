@@ -4,10 +4,6 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
-var express  = require('express');
-var app      = express();
-var filePath = 'index.html'
-
 app.set('port', (process.env.PORT || 5000));
 
 const TeleBot = require('telebot')

@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/EvanRupert/smart-group-bot#readme",
   "dependencies": {
-    "express": "^4.16.1",
     "telebot": "^1.2.3"
   }
 }

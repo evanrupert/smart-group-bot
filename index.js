@@ -5,6 +5,7 @@ var url = require('url')
 var fs = require('fs');
 var path = require('path');
 
+<<<<<<< HEAD
 const tzwhere = require('tzwhere');
 const parsetime = require('parsetime')
 
@@ -13,11 +14,12 @@ const TeleBot = require('telebot');
 tzwhere.init()
 
 var schedule = require('node-schedule');
+=======
+>>>>>>> cea68800b580167006c4d13aa90c01732a360929
 
-const bot = new TeleBot(
-{
-	token: '457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y', // Required. Telegram Bot API token.
+const bot = require('./bot.js');
 
+<<<<<<< HEAD
 	polling: { // Optional. Use polling.
 		interval: 1000, // Optional. How often check updates (in ms).
 		timeout: 0, // Optional. Update polling timeout (0 - short polling).
@@ -28,6 +30,8 @@ const bot = new TeleBot(
 
 var sent_invites = new Object();
 var events = new Object();
+=======
+>>>>>>> cea68800b580167006c4d13aa90c01732a360929
 
 http.createServer(function (request, response) {
 	var parsedUrl = url.parse(req.url, true); // true to get query as object
@@ -43,8 +47,41 @@ http.createServer(function (request, response) {
 	response.end('walrus', 'utf-8');
 }).listen(process.env.PORT || 5000);
 
+<<<<<<< HEAD
 /************************Start*********************/
 var timezone_lookup = new Object();
+=======
+	
+bot.on(/^\/name (.+)$/, (msg, props) => {
+	let name = props.match[1];
+	const id = msg.chat.id
+	bot.sendMessage(id, name)
+	bot.setChatTitle(id, name)
+
+//bot.on(['/start','/hello'], (msg) => {
+//	bot.sendMessage(msg.from.id, 'Please enter your event name')
+});
+
+bot.on(/^\/location (.+)$/, (msg, props) => {
+	let location = props.match[1];
+	bot.sendMessage(msg.from.id, location)
+});
+
+bot.on(/^\/date (.+)$/, (msg, props) => {
+	let date = props.match[1];
+	bot.sendMessage(msg.from.id, date)
+});
+
+
+
+	
+
+var reminders = []
+
+
+
+/*********************CheckIn**********/
+>>>>>>> cea68800b580167006c4d13aa90c01732a360929
 
 fs.readFile('./timezone.json', function(err, data){
 	if(!err)timezone_lookup = JSON.parse(data)
@@ -58,6 +95,39 @@ bot.on('/updatelocation', function (msg){
 	}],
 	['Cancel']], {once:true, resize:true})
     bot.sendMessage(msg.chat.id, "Input timezone:", {replyMarkup: replyMark})
+});
+
+
+var attendees = {};
+
+function attendeeToString(attendee) {
+    return attendee.first_name + ' ' + attendee.last_name + ' (' + attendee.username + ')';
+}
+
+
+bot.on(['/checkin'], (msg) => {
+	attendees[msg.from.id] = msg.from;
+	console.log(attendeeToString(msg.from) + ' has checked in');
+});
+
+
+bot.on(['/attendeeCount'], (msg) => {
+	bot.sendMessage(msg.chat.id, Object.keys(attendees).length);
+});
+
+
+bot.on(['/attendeeList'], (msg) => {
+	if(Object.keys(attendees).length == 0) {
+		bot.sendMessage(msg.chat.id, 'There are no people in attendence');
+	} else {
+		let reply = Object.values(attendees).map(attendeeToString).join('\n');
+		bot.sendMessage(msg.chat.id, reply);
+	}
+});
+
+
+bot.on(['/clearAttendees'], (msg) => {
+	attendees = {};
 });
 
 bot.on('location', (loc) => {

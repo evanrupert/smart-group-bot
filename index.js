@@ -94,6 +94,25 @@ bot.on(['/clearAttendees'], (msg) => {
 });
 
 /**************************LINKING**************/
+let share_data = new Object();
+
+const randBase64 = function(pool, length){
+	let ret = ''
+	
+	for(var i = 0; i < length; i++){
+		ret += pool.charAt(Math.floor(Math.random() * pool.length))
+	}
+	
+	return ret
+}
+
+const make_id = function(length){
+	while(true){
+		let id = randBase64('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', length)
+		if(!(id in share_data))return id
+	}
+}
+
 // https://t.me/joinchat/G0BAhkLtT44bjTBX-bl6iQ
 bot.on(['/shareLink'], (msg) => {
 	https.get('https://api.telegram.org/bot457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y/exportChatInviteLink?chat_id=' + msg.chat.id, (res) => {
@@ -109,7 +128,17 @@ bot.on(['/shareLink'], (msg) => {
 				let link = json.result;
 				let split = link.split('/');
 				let linkBottom = split[split.length - 1];
-				let startGroupLink = 'https://telegram.me/smrtgroupbot?startgroup=' + linkBottom;
+				
+				let id = make_id(10)
+				
+				share_data[id] = {
+					'ref': linkBottom,
+					'name': name,
+					'loc': '',
+					'time': ''
+				}
+				
+				let startGroupLink = 'https://telegram.me/smrtgroupbot?startgroup=' + id
 				bot.sendMessage(msg.chat.id, startGroupLink);
 			} else {
 				bot.sendMessage(msg.chat.id, 'Unable to get invite link!!\nMake sure the SmartGroupBot has admin right to invite users via link and the current group is upgraded to a supergroup');
@@ -119,11 +148,21 @@ bot.on(['/shareLink'], (msg) => {
 });
 
 bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
-	let link = 'https://t.me/joinchat/' + props.match[1];
-	bot.sendMessage(msg.chat.id, 'Hello everybody, if you are interested in joining the <insert name here> study group follow this link: ' + link);
+	let id = props.match[1]
+	
+	if(!(id in share_data)){
+		console.log('Invalid id: ' + id)
+		return
+	}
+
+	let link = 'https://t.me/joinchat/' + share_data[id]['ref']
+	let group_name = share_data[id]['name']
+	
+	delete share_data[id]
+	
+	bot.sendMessage(msg.chat.id, 'Hello everybody, if you are interested in joining the ' + group_name + ' study group follow this link: ' + link);
 	bot.leaveChat(msg.chat.id);
 });
-
 
 /*************************TESTING**********************/
 

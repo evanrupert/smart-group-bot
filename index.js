@@ -452,6 +452,7 @@ bot.on(['/destroy'], (msg) => {
 	delete location[msg.chat.id];
 	delete date[msg.chat.id];
 	delete attendees[msg.chat.id];
+	delete resources[msg.chat.id];
 	//TODO: also destroy events data (looking at you jordan)
 });
 

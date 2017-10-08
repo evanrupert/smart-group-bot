@@ -4,7 +4,9 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
-const TeleBot = require('telebot')
+const TeleBot = require('telebot');
+
+var schedule = require('node-schedule');
 
 const bot = new TeleBot(
 {
@@ -25,11 +27,24 @@ http.createServer(function (request, response) {
 	response.end('walrus', 'utf-8');
 }).listen(process.env.PORT || 5000);
 
-
 /************************Start*********************/
 
-
-bot.on('text', (msg) => msg.reply.text(msg.text));
-
+bot.on(/^\/event\s(\d+)/, function (msg, prop){
+	var time = new Date()
+	
+	const msg_data = prop.match[1].split('\s')
+	const parse_time = msg_data[0].split(':')
+	
+	time.hours = parse_time[0]
+	time.hours = parse_time[1]
+	
+	bot.sendMessage(msg.from.id, new Date(msg.date * 1000), {replyToMessage: msg.message_id});
+	
+	const name = msg_data[1]
+	
+	schedule.scheduleJob(time, function(chat_id, msg_id, event_name){
+		bot.sendMessage(chat_id, 'Event ' + event_name, {replyToMessage: msg_id});
+	}.bind(null, msg.from.id, msg.message_id, name));
+});
 
 bot.start();

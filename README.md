@@ -13,6 +13,7 @@ Add SmartGroupBot [Here](https://telegram.me/smrtgroupbot)!
 # Bot Commands
 ```sh
 SETUP
+
 	/setName <name>            //Sets name of event and event chat
 	/setLocation               //sets location of the event
 	/setDate <date> <time>     //sets date of and time of the event
@@ -22,6 +23,7 @@ SETUP
 	
 
 GROUP COMMANDS
+
 	/checkIn                   //checks user into the event
 	/checkOut
 	/attendeeCount             //responds with the number of people who have checked in

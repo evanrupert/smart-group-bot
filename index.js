@@ -16,6 +16,7 @@ var https = require('https');
 
 var sent_invites = new Object();
 var events = new Object();
+var resources = new Object();
 
 
 http.createServer(function (request, response) {
@@ -417,6 +418,24 @@ bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
 	bot.sendMessage(msg.chat.id, message);
 	bot.leaveChat(msg.chat.id);
 });
+
+
+/************************RESOURCES**************************/
+
+bot.on(/^\/save (.+)$/, (msg, props) => {
+	let resource = props.match[1];
+	if(!(msg.chat.id in resources)) {
+		resources[msg.chat.id] = [];
+	}
+	resources[msg.chat.id].push(resource);
+});
+
+
+bot.on(['/resources'], (msg) => {
+	let str = resources[msg.chat.id].join('\n\n');
+	bot.sendMessage(msg.chat.id, str);
+});
+
 
 
 /****************************DESTROY**********/

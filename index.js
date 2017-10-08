@@ -83,7 +83,7 @@ bot.on(/^\/setDate (.+)$/, (msg, props) => {
 	if (!(msg.from.id in timezone_lookup)){
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updateTimezone before using events.');
 	}else{
-		time = parseTime(props.match[1], timezone_lookup[msg.from.id])
+		let time = parseTime(props.match[1], timezone_lookup[msg.from.id])
 		if(time){
 			bot.sendMessage(msg.chat.id, 'Main event date set: ' + time);
 			date[msg.chat.id] = time;

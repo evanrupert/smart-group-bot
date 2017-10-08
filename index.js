@@ -93,15 +93,9 @@ bot.on(['/clearAttendees'], (msg) => {
 	attendees = {};
 });
 
-
-/*************************TESTING**********************/
-
-bot.on(['/getId'], (msg) => {
-	bot.sendMessage(msg.chat.id, msg.chat.id);
-})
-
-
-bot.on(['/test'], (msg) => {
+/**************************LINKING**************/
+// https://t.me/joinchat/G0BAhkLtT44bjTBX-bl6iQ
+bot.on(['/shareLink'], (msg) => {
 	https.get('https://api.telegram.org/bot457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y/exportChatInviteLink?chat_id=' + msg.chat.id, (res) => {
 		let raw = '';
 		res.on('data', (d) => {
@@ -111,12 +105,35 @@ bot.on(['/test'], (msg) => {
 		res.on('end', () => {
 			let json = JSON.parse(raw)
 
-			if(json){
+			if(json && json.result){
 				let link = json.result;
-				bot.sendMessage(msg.chat.id, link);
+				let split = link.split('/');
+				let linkBottom = split[split.length - 1];
+				let startGroupLink = 'https://telegram.me/smrtgroupbot?startgroup=' + linkBottom;
+				bot.sendMessage(msg.chat.id, startGroupLink);
+			} else {
+				bot.sendMessage(msg.chat.id, 'Unable to get invite link!!\nMake sure the SmartGroupBot has admin right to invite users via link and the current group is upgraded to a supergroup');
 			}
 		});
 	});
+});
+
+bot.on(/^\/start@smrtgroupbot (.+)$/, (msg, props) => {
+	let link = 'https://t.me/joinchat/' + props.match[1];
+	bot.sendMessage(msg.chat.id, 'Hello everybody, if you are interested in joining the <insert name here> study group follow this link: ' + link);
+	bot.leaveChat(msg.chat.id);
+});
+
+
+/*************************TESTING**********************/
+
+bot.on(['/getId'], (msg) => {
+	bot.sendMessage(msg.chat.id, msg.chat.id);
+})
+
+
+bot.on(['/test'], (msg) => {
+	bot.sendMessage(msg.chat.id, 'Test');
 });
 
 bot.start();

@@ -25,7 +25,7 @@ SETUP
 GROUP COMMANDS
 
 	/checkIn                   //checks user into the event
-	/checkOut
+	/checkOut		   //checks user out of the event
 	/attendeeCount             //responds with the number of people who have checked in
 	/attendeeList              //responds with a list of the people who have checked in
 	/updateTimeZone            //updates time zone of the event

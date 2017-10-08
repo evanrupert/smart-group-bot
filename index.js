@@ -4,8 +4,9 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
-var express = require('express');
-var app     = express();
+var express  = require('express');
+var app      = express();
+var filePath = 'index.html'
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -26,8 +27,16 @@ const bot = new TeleBot(
 var reminders = []
 
 http.createServer(function (request, response) {
-	response.writeHead(404);
-	response.end();
+	fs.readFile(filePath, function(error, content) {
+		if (error) {
+			response.writeHead(500);
+			response.end();
+		}
+		else {
+			response.writeHead(200, { 'Content-Type': 'text/html' });
+			response.end(content, 'utf-8');
+		}
+	});
 }).listen(process.env.PORT || 5000);
 
 bot.on(/^\/remind\s(.+)*/, function(msg, props){

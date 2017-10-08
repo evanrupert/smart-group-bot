@@ -81,7 +81,13 @@ bot.on(/^\/setLocation (.+)$/, (msg, props) => {
 bot.on(/^\/setDate (.+)$/, (msg, props) => {
 	if (!(msg.from.id in timezone_lookup)){
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updateTimezone before using events.');
-	}else date[msg.chat.id] = parseTime(props.match[1], timezone_lookup[msg.from.id])
+	}else{
+		time = parseTime(props.match[1], timezone_lookup[msg.from.id])
+		if(time){
+			bot.sendMessage(msg.chat.id, 'Main event date set: ' + time);
+			date[msg.chat.id] = time;
+		}else bot.sendMessage(msg.chat.id, 'Unrecognized time/date format.');
+	}
 });
 
 
@@ -316,9 +322,9 @@ bot.on(/^\/notify\s(\d+)\s(.+)\after/, function (msg, prop){
 		return
 	}
 	
+	let event_name = 'Main event started ' + num + ' ' + suffix + ' ago'
 	bot.sendMessage(msg.chat.id, 'Created notification event! : ' + num + ' ' + suffix + ' after ( ' + new_date + ' )');
-	name = 'Main event started ' + num + ' ' + suffix + ' ago'
-	scheduleEvent(msg.chat.id, msg.message_id, name, new_date)
+	scheduleEvent(msg.chat.id, msg.message_id, event_name, new_date)
 })
 
 

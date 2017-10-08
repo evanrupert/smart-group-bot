@@ -125,6 +125,21 @@ bot.on('/time', function(msg){
 	msg.reply.text(new Date())
 })
 
+const parseTime = function(extracted_time, timezoneOffset){
+	var unixTime = parsetime(extracted_time).absolute
+	if(unixTime == 0){
+		return null
+	}else{
+		var time = new Date(parsetime(extracted_time).absolute)
+		if(time.getFullYear() == '2001'){
+			time = new Date(parsetime(extracted_time + ' 2017').absolute)
+		}
+		
+		time = new Date(time.valueOf() + time.getTimezoneOffset() * 60 * 1000 + timezoneOffset)
+		return time
+	}
+}
+
 bot.on(/^\/event\s(.+)/, function (msg, prop){
 	if (!(msg.from.id in timezone_lookup)){
 		bot.sendMessage(msg.chat.id, 'Cannot schedule events without the user\'s time zone. The timezone is determined by providing the user location. Run /updatelocation before using events.');
@@ -133,18 +148,9 @@ bot.on(/^\/event\s(.+)/, function (msg, prop){
 		const extracted_time = msg_data[msg_data.length - 1]
 		const name = msg_data.slice(0,msg_data.length-1).join('').trim()
 		
-		var unixTime = parsetime(extracted_time).absolute
-		if(unixTime == 0){
-			bot.sendMessage(msg.chat.id, 'Unrecognized time format.');
-		}else{
-			var time = new Date(parsetime(extracted_time).absolute)
-			console.log(time.getYear())
-			if(time.getFullYear() == '2001'){
-				time = new Date(parsetime(extracted_time + ' 2017').absolute)
-			}
-			
-			time = new Date(time.valueOf() + time.getTimezoneOffset() * 60 * 1000 + timezone_lookup[msg.from.id])
-			
+		let time = parseTime(extracted_time, timezone_lookup[msg.from.id])
+		
+		if(time){
 			if(time.valueOf() < Date.now()){
 				bot.sendMessage(msg.chat.id, 'Time has already passed. Event not created.');
 			}else{
@@ -158,6 +164,8 @@ bot.on(/^\/event\s(.+)/, function (msg, prop){
 				
 				events[name] = true
 			}
+		}else{
+			bot.sendMessage(msg.chat.id, 'Unrecognized time/date format.');
 		}
 	}
 });
@@ -253,6 +261,5 @@ bot.on(['/getId'], (msg) => {
 bot.on(['/test'], (msg) => {
 	bot.sendMessage(msg.chat.id, 'Test');
 });
->>>>>>> link
 
 bot.start();

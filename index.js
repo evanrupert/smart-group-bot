@@ -4,19 +4,9 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 
-const TeleBot = require('telebot')
 
-const bot = new TeleBot(
-{
-	token: '457195654:AAHVNzh7SVXQr1wpLKw75x_7h_snj1IlA5Y', // Required. Telegram Bot API token.
+const bot = require('./bot.js');
 
-	polling: { // Optional. Use polling.
-		interval: 1000, // Optional. How often check updates (in ms).
-		timeout: 0, // Optional. Update polling timeout (0 - short polling).
-		limit: 100, // Optional. Limits the number of updates to be retrieved.
-		retryTimeout: 5000 // Optional. Reconnecting timeout (in ms).
-	}
-});
 
 http.createServer(function (request, response) {
 	response.writeHead(200, { 'Content-Type': 'text/html' });
@@ -52,10 +42,43 @@ var reminders = []
 
 
 
-/************************Start*********************/
+/*********************CheckIn**********/
 
 
-bot.on('text', (msg) => msg.reply.text(msg.text));
+
+
+var attendees = {};
+
+function attendeeToString(attendee) {
+    return attendee.first_name + ' ' + attendee.last_name + ' (' + attendee.username + ')';
+}
+
+
+bot.on(['/checkin'], (msg) => {
+	attendees[msg.from.id] = msg.from;
+	console.log(attendeeToString(msg.from) + ' has checked in');
+});
+
+
+bot.on(['/attendeeCount'], (msg) => {
+	bot.sendMessage(msg.chat.id, Object.keys(attendees).length);
+});
+
+
+bot.on(['/attendeeList'], (msg) => {
+	if(Object.keys(attendees).length == 0) {
+		bot.sendMessage(msg.chat.id, 'There are no people in attendence');
+	} else {
+		let reply = Object.values(attendees).map(attendeeToString).join('\n');
+		bot.sendMessage(msg.chat.id, reply);
+	}
+});
+
+
+bot.on(['/clearAttendees'], (msg) => {
+	attendees = {};
+});
+
 
 
 bot.start();
